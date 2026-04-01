@@ -43,6 +43,7 @@ func TestTransferTx(t *testing.T) {
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,
+
 			})
 			errs <- err
 			results <- result
@@ -58,7 +59,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotEmpty(t, result)
 		require.Equal(t, account1.ID, result.FromAccount.ID)
 		require.Equal(t, account2.ID, result.ToAccount.ID)
-		require.Equal(t, amount, result.FromEntry.Amount)
+		require.Equal(t, -amount, result.FromEntry.Amount)
 		require.Equal(t, amount, result.ToEntry.Amount)
 		log.Printf("transfer %d: from account %d to account %d, amount: %d", i+1, result.FromAccount.ID, result.ToAccount.ID, amount)
 		log.Printf("account1 balance after: %d, account2 balance after: %d", result.FromAccount.Balance, result.ToAccount.Balance)

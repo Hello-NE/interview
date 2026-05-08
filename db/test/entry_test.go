@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	db "interview/db/sqlc"
-	"interview/util"
+	"interview/db/util"
 )
 
 func TestCreateEntry(t *testing.T) {

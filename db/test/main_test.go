@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	db "interview/db/sqlc"
-	"interview/util"
+	"interview/db/util"
 )
 
 var testQueries *db.Queries
@@ -37,9 +37,9 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-
 func createRandomUser(t *testing.T) db.User {
-	hashedPassword := util.RandomString(6)
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	require.NoError(t, err)
 	user, err := testQueries.CreateUser(context.Background(), db.CreateUserParams{
 		Username:     util.RandomOwner(),
 		PasswordHash: hashedPassword,

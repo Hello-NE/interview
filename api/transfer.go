@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	db "interview/db/sqlc"
+	token "interview/token"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,14 +15,19 @@ type transferRequest struct {
 	Currency      string `json:"currency" binding:"required,currency"`
 }
 
-func (server *Server) createTransfer(ctx *gin.Context) {
+func (server *Server) CreateTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
-	if _, ok := server.vaildAccount(ctx, req.FromAccountID, req.Currency); !ok {
+	fromAccount, ok := server.vaildAccount(ctx, req.FromAccountID, req.Currency)
+	if !ok {
+		return
+	}
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if fromAccount.Owner != payload.Username {
+		ctx.JSON(401, gin.H{"error": "account doesn't belong to the authenticated user"})
 		return
 	}
 
@@ -34,7 +40,7 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
 	}
-	result, err := server.store.TransferTx(ctx, arg)
+	result, err := server.Store.TransferTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -44,7 +50,7 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 }
 
 func (server *Server) vaildAccount(ctx *gin.Context, accountID int64, currency string) (*db.Account, bool) {
-	account, err := server.store.GetAccount(ctx, accountID)
+	account, err := server.Store.GetAccount(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(404, gin.H{"error": "Account not found"})

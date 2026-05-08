@@ -18,5 +18,6 @@ test:
 
 server:
 	go run main.go
-
-.PHONY: server createdb dropdb postgres migrateup migratedown test
+mock:
+	mockgen -source=d:\Project\goProject\interview\db\sqlc\store_interface.go -destination=d:\Project\goProject\interview\db\sqlc\mock_store.go -package=db
+.PHONY: server createdb dropdb postgres migrateup migratedown test mock

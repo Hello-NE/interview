@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	db "interview/db/sqlc"
-	"interview/util"
+	"interview/db/util"
 )
 
 func TestCreateAccount(t *testing.T) {
@@ -73,11 +73,13 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
+	var lastAccount db.Account
 	for i := 0; i < 10; i++ {
-		createRandomAccount(t)
+		lastAccount = createRandomAccount(t)
 	}
 
 	arg := db.ListAccountsParams{
+		Owner:  lastAccount.Owner,
 		Limit:  5,
 		Offset: 0,
 	}
@@ -88,6 +90,7 @@ func TestListAccounts(t *testing.T) {
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.Owner, account.Owner)
 	}
 }
 
